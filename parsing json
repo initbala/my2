@@ -1,0 +1,33 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Data;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
+using System.Xml;
+
+class MainClass
+{
+    private const string Path = @"e:\config.json";
+    public static void Main()
+    {
+        DataTable dtjson = new DataTable();
+        dtjson.Columns.Add("Path");
+        dtjson.Columns.Add("Name");
+        dtjson.Columns.Add("Value");
+
+        JObject ParsedJobj = JObject.Parse(File.ReadAllText(Path));
+        var query = ParsedJobj.Descendants().OfType<JProperty>().Where(p => p.Value.Type != JTokenType.Array && p.Value.Type != JTokenType.Property);
+        foreach (JToken property in query)
+        {
+            DataRow drjson = dtjson.NewRow();
+            drjson["Path"] = property.Path.ToString();
+            string[] stJprop = property.ToString().Replace("\"","").Split(':');
+            drjson["Name"] = stJprop[0].Trim(' ');
+            drjson["Value"] = stJprop[1].Trim(' ');
+            dtjson.Rows.Add(drjson);
+
+        }
+    }
+    
+}
